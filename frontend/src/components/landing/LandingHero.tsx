@@ -71,6 +71,26 @@ const LandingHero = () => {
         </div>
       </div>
     </section>
+
+
+    {/* Trust Indicator */}
+    <div className='flex flex-wrap justify-center items-center gap-8 text-sm text-gray-600'>
+      <div className='flex items-center space-x-2'>
+        <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+        <span>500+ Certifed Doctors</span>
+        
+      </div>
+            <div className='flex items-center space-x-2'>
+            <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+           <span>50,000 Satisfied Patients</span>
+        
+      </div>
+           <div className='flex items-center space-x-2'>
+           <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+           <span>24/7 Available</span>
+        
+      </div>
+    </div>
   </div>
 </section>
 
