@@ -1,5 +1,10 @@
 'use client'
+
+import FAQSection from "@/components/landing/FAQSection";
+import Footer from "@/components/landing/Footer";
 import Header from "@/components/landing/Header";
+import LandingHero from "@/components/landing/LandingHero";
+import TestimonialsSection from "@/components/landing/TestimonialsSection";
 import { useRouter } from 'next/navigation';
 import { useEffect } from "react";
 
@@ -21,6 +26,12 @@ export default function Home() {
   return (
    <div className="min-h-screen bg-white">
     <Header showDashboardNav={false}/>
+    <main className="pt-17">
+     <LandingHero/>
+     <TestimonialsSection/>
+     <Footer/>
+     <FAQSection/>
+    </main>
    </div>
   );
 }
