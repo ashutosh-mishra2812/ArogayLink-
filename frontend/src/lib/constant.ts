@@ -55,3 +55,36 @@ export const healthcareCategories = [
   }
 ];
 
+
+
+export const testimonials = 
+    [
+  {
+    rating: 5,
+    text: "Doctor connected with me instantly, patiently listened to my health issues, and prescribed the right treatment. He explained the medicines clearly and the whole process felt hassle-free.",
+    author: "Rahul S.",
+    location: "From Delhi",
+    bgColor: "bg-chart-1/10"
+  },
+  {
+    rating: 5,
+    text: "The consultation was very comfortable. The doctor was polite, answered all my doubts, and gave useful advice. I felt very confident about the treatment.",
+    author: "Priya K.",
+    location: "From Mumbai",
+    bgColor: "bg-chart-2/10"
+  },
+  {
+    rating: 5,
+    text: "My doctor was highly professional and caring. She asked all the right questions and explained everything in simple Hindi and English, which made it easy to understand.",
+    author: "Meena R.",
+    location: "From Lucknow",
+    bgColor: "bg-chart-4/10"
+  },
+  {
+    rating: 5,
+    text: "Booking the appointment was super quick. I got a consultation the very next morning and was able to continue my regular medicines without delay. This is very helpful for people like me in smaller towns.",
+    author: "Amit V.",
+    location: "From Jaipur",
+    bgColor: "bg-chart-5/10"
+  }
+];
