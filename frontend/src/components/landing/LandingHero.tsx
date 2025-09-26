@@ -2,13 +2,28 @@ import React from 'react'
 import { Button } from '../ui/button'
 import Link from 'next/link'
 import { healthcareCategories } from '@/lib/constant'
+import { useRouter } from 'next/navigation'
+
 
 
 const LandingHero = () => {
+  const isAuthenticated=false
+  const router= useRouter();
 
-
-
+  const handleBookConsultation=()=>{
+    if(isAuthenticated){
+      router.push('/doctor-list');
+    }else{
+      router.push('/singup/patient')
+    }
+  }
+  
   const handleCategoryClick=(categoryTitle:string)=>{
+    if(isAuthenticated){
+      router.push(`/doctor-list?category=${categoryTitle}`)
+    }else{
+      router.push('/singup/patient')
+    }
 
   }
   return (
@@ -30,7 +45,7 @@ const LandingHero = () => {
 
 
     <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-      <Button
+      <Button onClick={handleBookConsultation}
         size="lg"
         className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-full px-8 py-3 text-lg shadow-md transition-transform transform hover:scale-105"
       >

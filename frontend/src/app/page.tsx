@@ -29,8 +29,8 @@ export default function Home() {
     <main className="pt-17">
      <LandingHero/>
      <TestimonialsSection/>
-     <Footer/>
      <FAQSection/>
+     <Footer/>
     </main>
    </div>
   );

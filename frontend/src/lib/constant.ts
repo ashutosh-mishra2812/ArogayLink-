@@ -1,3 +1,5 @@
+import { Twitter, Facebook, Linkedin, Instagram, Mail, MapPin, Phone,} from "lucide-react";
+
 export const healthcareCategories = [
   {
     id: 'primary-care',
@@ -87,4 +89,103 @@ export const testimonials =
     location: "From Jaipur",
     bgColor: "bg-chart-5/10"
   }
+];
+
+
+
+export const faqs = [
+  {
+    question: "How much does a doctor visit with ArogyaLink+ cost?",
+    answer: "For online consultations, fees usually start at ₹299 and may vary depending on the specialty. With an ArogyaLink+ membership, visits cost as low as ₹199. Membership is ₹499 for three months and ₹1,499 for a yearly plan."
+  },
+  {
+    question: "Do you accept health insurance?",
+    answer: "Yes, ArogyaLink+ accepts most major health insurance providers in India, including ICICI Lombard, Star Health, Niva Bupa, HDFC Ergo, and others. You can also pay using UPI, digital wallets, debit/credit cards, or net banking."
+  },
+  {
+    question: "What conditions can ArogyaLink+ doctors treat?",
+    answer: "Our doctors provide consultations for fever, cold, cough, allergies, stomach issues, skin problems, women’s health, mental health support, chronic disease management, and many more everyday health concerns."
+  },
+  {
+    question: "How quickly can I see a doctor?",
+    answer: "With ArogyaLink+, you can often book same-day appointments, and in many cases connect with a doctor within 30 minutes. Appointments are flexible and designed to fit your schedule."
+  },
+  {
+    question: "Can I get prescriptions and lab tests?",
+    answer: "Yes. After your consultation, doctors can provide e-prescriptions. We also help you book lab tests and share results digitally for your convenience."
+  },
+  {
+    question: "Is ArogyaLink+ available in regional languages?",
+    answer: "Yes, we support consultations in Hindi, English, and several regional languages, so you can comfortably speak in the language you prefer."
+  }
+];
+
+export const trustLogos = [
+  "The Times of India", 
+  "NDTV", 
+  "India Today", 
+  "The Economic Times", 
+  "Hindustan Times", 
+  "Business Standard",
+  "Moneycontrol", 
+  "YourStory", 
+  "The Hindu", 
+  "Deccan Herald", 
+  "ET Healthworld", 
+  "The Indian Express"
+];
+
+export const contactInfo = [
+  {
+    icon: Phone,
+    text: "1-888-MEDICARE (1-888-633-4227)",
+  },
+  {
+    icon: Mail,
+    text: "support@medicare-plus.com",
+  },
+  {
+    icon: MapPin,
+    text: "Available across India",
+  },
+];
+
+    export const footerSections = [
+    {
+      title: "Company",
+      links: [
+        { text: "About Us", href: "/about" },
+        { text: "Support Center", href: "/support" },
+        { text: "Contact Us", href: "/contact" }
+      ]
+    },
+    {
+      title: "For Healthcare",
+      links: [
+        { text: "Join as Doctor", href: "/signup/doctor" },
+        { text: "Doctor Resources", href: "/doctor-resources" },
+      ]
+    },
+    {
+      title: "For Patients",
+      links: [
+        { text: "Find Doctors", href: "/doctors" },
+        { text: "Book Appointment", href: "/signup/patient" },
+      ]
+    },
+    {
+      title: "Legal",
+      links: [
+        { text: "Privacy Policy", href: "/privacy" },
+        { text: "Terms of Service", href: "/terms" },
+      ]
+    }
+  ];
+
+
+export const socials = [
+  { name: "twitter", icon: Twitter, url: "https://twitter.com/arogyalink-plus" },
+  { name: "facebook", icon: Facebook, url: "https://facebook.com/arogyalink-plus" },
+  { name: "linkedin", icon: Linkedin, url: "https://linkedin.com/company/arogyalink-plus" },
+  { name: "instagram", icon: Instagram, url: "https://instagram.com/arogyalink-plus" },
 ];
