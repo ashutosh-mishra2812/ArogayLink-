@@ -1,10 +1,11 @@
-import Authform from "@/components/auth/Authform";
+import AuthForm from "@/components/auth/AuthForm";
 
-export const metadata={
-  title: 'Patient Login - ArogyaLink+',
-  description:'Sign in to ArogyaLink+ account to access healthcare consultations.',
+export const metadata = {
+  title: "Patient Login - ArogyaLink+",
+  description:
+    "Sign in to your ArogyaLink+ account to access healthcare consultations.",
 };
 
-export default function PatientLoginPage{
-  return <Authform type='login' userRole='patient' />
+export default function PatientLoginPage() {
+  return <AuthForm type="login" userRole="patient" />;
 }
