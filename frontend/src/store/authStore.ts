@@ -1,7 +1,14 @@
+// frontend/src/store/authStore.ts
 import { User } from "@/lib/types";
-import { getWithAuth, postWithoutAuth } from "@/service/httpService";
+import { getWithAuth, postWithoutAuth, postWithAuth } from "@/service/httpService";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+
+interface AuthData {
+  name?: string;
+  email: string;
+  password: string;
+}
 
 interface AuthState {
   user: User | null;
@@ -10,17 +17,15 @@ interface AuthState {
   error: string | null;
   isAuthenticated: boolean;
 
-  // Actions
   setUser: (user: User, token: string) => void;
   clearUser: () => void;
 
-  // API Actions
   loginDoctor: (email: string, password: string) => Promise<void>;
   loginPatient: (email: string, password: string) => Promise<void>;
-  registerDoctor: (data: any) => Promise<void>;
-  registerPatient: (data: any) => Promise<void>;
+  registerDoctor: (data: AuthData) => Promise<void>;
+  registerPatient: (data: AuthData) => Promise<void>;
   fetchProfile: () => Promise<User | null>;
-  updateProfile: (data: any) => Promise<void>;
+  updateProfile: (data: AuthData) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -33,11 +38,12 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
 
       setUser: (user, token) => {
+        if (typeof window !== "undefined") localStorage.setItem("token", token);
         set({ user, token, isAuthenticated: true, error: null });
       },
 
       clearUser: () => {
-        localStorage.removeItem("auth");
+        if (typeof window !== "undefined") localStorage.removeItem("token");
         set({ user: null, token: null, isAuthenticated: false, error: null });
       },
 
@@ -47,8 +53,7 @@ export const useAuthStore = create<AuthState>()(
           const res = await postWithoutAuth("/auth/doctor/login", { email, password });
           get().setUser(res.data.user, res.data.token);
         } catch (error: any) {
-          set({ error: error.message });
-          throw error;
+          set({ error: error.message || "Login failed" });
         } finally {
           set({ loading: false });
         }
@@ -60,8 +65,7 @@ export const useAuthStore = create<AuthState>()(
           const res = await postWithoutAuth("/auth/patient/login", { email, password });
           get().setUser(res.data.user, res.data.token);
         } catch (error: any) {
-          set({ error: error.message });
-          throw error;
+          set({ error: error.message || "Login failed" });
         } finally {
           set({ loading: false });
         }
@@ -73,8 +77,7 @@ export const useAuthStore = create<AuthState>()(
           const res = await postWithoutAuth("/auth/doctor/register", data);
           get().setUser(res.data.user, res.data.token);
         } catch (error: any) {
-          set({ error: error.message });
-          throw error;
+          set({ error: error.message || "Registration failed" });
         } finally {
           set({ loading: false });
         }
@@ -86,8 +89,7 @@ export const useAuthStore = create<AuthState>()(
           const res = await postWithoutAuth("/auth/patient/register", data);
           get().setUser(res.data.user, res.data.token);
         } catch (error: any) {
-          set({ error: error.message });
-          throw error;
+          set({ error: error.message || "Registration failed" });
         } finally {
           set({ loading: false });
         }
@@ -98,12 +100,12 @@ export const useAuthStore = create<AuthState>()(
         try {
           const { user } = get();
           if (!user) throw new Error("User not found");
-          const endPoint = user.type === "doctor" ? "/doctors/me" : "/patients/me";
-          const response = await getWithAuth(endPoint);
+          const endpoint = user.type === "doctor" ? "/doctor/me" : "/patient/me";
+          const response = await getWithAuth(endpoint);
           set({ user: { ...user, ...response.data } });
           return response.data;
         } catch (error: any) {
-          set({ error: error.message });
+          set({ error: error.message || "Failed to fetch profile" });
           return null;
         } finally {
           set({ loading: false });
@@ -115,15 +117,14 @@ export const useAuthStore = create<AuthState>()(
         try {
           const { user } = get();
           if (!user) throw new Error("User not found");
-          const endPoint =
+          const endpoint =
             user.type === "doctor"
-              ? "/doctors/onboarding/update"
-              : "/patients/onboarding/update";
-          const response = await postWithoutAuth(endPoint, data);
+              ? "/doctor/onboarding/update"
+              : "/patient/onboarding/update";
+          const response = await postWithAuth(endpoint, data);
           set({ user: { ...user, ...response.data } });
         } catch (error: any) {
-          set({ error: error.message });
-          throw error;
+          set({ error: error.message || "Profile update failed" });
         } finally {
           set({ loading: false });
         }

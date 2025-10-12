@@ -1,7 +1,7 @@
 const express = require("express");
 // FIX 1: Import 'body' from express-validator for validation
 const { body } = require('express-validator'); 
-const Patient = require("../modal/Patient");
+const Patient = require("../models/Patient");
 const { authenticate, requireRole } = require("../middleware/auth");
 // FIX 2: Import the 'validate' middleware
 const validate = require("../middleware/validate");

@@ -1,9 +1,11 @@
-import React from 'react'
+import React from "react";
+import DoctorOnboardingForm from "@/components/doctor/DoctorOnboardingForm";
 
-const page = () => {
-  return (
-    <div>page</div>
-  )
+export const metadata = {
+  title: 'Launch Your Digital Clinic: Complete Your Doctor Profile',
+  description: 'Complete your profile now to unlock your consultation calendar and start booking.',
+};
+
+export default function DoctorOnboardingPage() {
+  return <DoctorOnboardingForm />;
 }
-
-export default page

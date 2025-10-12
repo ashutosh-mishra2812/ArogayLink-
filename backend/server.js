@@ -1,12 +1,9 @@
+require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose'); // Although imported, not used directly here, but kept for context.
 const { connectDB } = require('./db/db');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const cors = require('cors');
-const bodyParser = require('body-parser');
-require('dotenv').config();
-
 const response = require('./middleware/response');
 const moment = require('moment-timezone');
 
@@ -21,36 +18,47 @@ app.use(helmet());
 // HTTP request logging
 app.use(morgan('dev'));
 
-// Enable CORS
-app.use(
-  cors({
-    origin:
-      (process.env.ALLOWED_ORIGINS || '')
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean) || '*',
-    credentials: true,
-  })
-);
+// Parse incoming JSON and URL-encoded data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Parse incoming JSON and form data
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// CORS setup
+const allowedOriginsEnv = process.env.ALLOWED_ORIGINS || '';
+const allowedOrigins = allowedOriginsEnv
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
 
-// Custom response middleware
+app.use(cors({
+  origin: allowedOrigins.length ? allowedOrigins : true,
+  credentials: true,
+}));
+
+// Custom response helpers: res.ok, res.created, etc.
 app.use(response);
 
-// ✅ Routes (Uncommented to make the application functional)
+// Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/doctor', require('./routes/doctor'));
 app.use('/api/patient', require('./routes/patient'));
 
-// Health check endpoint
+// Health check
 app.get('/health', (req, res) => {
   const time = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
   res.ok({ time }, 'Server is healthy');
 });
 
-// Start the server
+// 404 handler: Always return JSON
+app.use((req, res) => {
+  res.notFound('Route not found');
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  if (res.headersSent) return next(err);
+  res.serverError('Internal server error', { message: err.message });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));

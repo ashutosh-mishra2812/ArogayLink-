@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
-const Doctor = require('../modal/Doctor');
-const Patient = require('../modal/Patient');
+const Doctor = require('../models/Doctor');
+const Patient = require('../models/Patient');
 
 module.exports = {
   // ✅ Middleware to verify JWT and fetch user

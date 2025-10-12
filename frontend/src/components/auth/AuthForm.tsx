@@ -1,71 +1,54 @@
-'use client'
+// frontend/src/components/auth/AuthForm.tsx
+'use client';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
-import React, { use, useState } from 'react'
+import React, { useState } from 'react';
 import { Card, CardContent } from '../ui/card';
-import { sign } from 'crypto';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
-import { Check, Eye, EyeOff, Link, Lock, Mail, User } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Label } from '../ui/label';
 import { Checkbox } from '../ui/checkbox';
 import { Separator } from '@radix-ui/react-dropdown-menu';
-
 
 interface AuthformProps {
   type: 'login' | 'signup';
   userRole: 'patient' | 'doctor';
 }
+
 const Authform = ({ type, userRole }: AuthformProps) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
 
-  const { registerPatient, registerDoctor, loginDoctor, loginPatient, loading, error } = useAuthStore();
+  const { registerPatient, registerDoctor, loginPatient, loginDoctor, loading, error } =
+    useAuthStore();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (type === 'signup' && !agreeTerms) return;
+
     try {
       if (type === 'signup') {
-        if (userRole === 'doctor') {
-          await registerDoctor({
-            name: formData.name,
-            email: formData.email,
-            password: formData.password,
-          });
-        } else {
-          await registerPatient({
-            name: formData.name,
-            email: formData.email,
-            password: formData.password,
-          });
-        }
+        if (userRole === 'doctor') await registerDoctor(formData);
+        else await registerPatient(formData);
         router.push(`/onboarding/${userRole}`);
       } else {
-        if (userRole === 'doctor') {
-          await loginDoctor(formData.email, formData.password);
-          router.push('/doctor/dashboard');
-        }
-        else {
-          await loginPatient(formData.email, formData.password);
-          router.push('/patient/dashboard');
-        }
-      }
-    } catch (error) {
-      console.log(error);
-      console.log(`${type},failed:`, error);
-    }
-  }
+        if (userRole === 'doctor') await loginDoctor(formData.email, formData.password);
+        else await loginPatient(formData.email, formData.password);
 
-  const handleGoogleAuth = ()=>{
-    window.location.href =`${process.env.NEXT_PUBLIC_API_URL}/auth/google?type=${userRole}`
-  }
+        router.push(`/${userRole}/dashboard`);
+      }
+    } catch {
+      // error already handled in store
+    }
+  };
+
+  const handleGoogleAuth = () => {
+    const base = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
+    window.location.href = `${base}/api/auth/google?type=${userRole}`;
+  };
 
   const isSignup = type === 'signup';
   const title = isSignup ? 'Create a secure account' : 'Welcome Back';
