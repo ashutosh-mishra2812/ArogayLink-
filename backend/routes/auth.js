@@ -102,28 +102,61 @@ router.post('/doctor/google', async (req, res) => {
 
 // PATIENT REGISTER
 router.post(
-  '/patient/register',
+  "/patient/register",
   [
-    body('name').notEmpty().withMessage('Name is required'),
-    body('email').isEmail().withMessage('Valid email is required'),
-    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+    body("name").notEmpty().withMessage("Name is required"),
+    body("email").isEmail().withMessage("Valid email is required"),
+    body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
   ],
   validate,
   async (req, res) => {
     try {
       const { name, email, password, age, gender } = req.body;
 
-      if (await Patient.findOne({ email })) return res.badRequest('Patient already exists');
+      // 🔍 Check if patient already exists
+      const existingPatient = await Patient.findOne({ email });
+      if (existingPatient) {
+        return res.status(400).json({
+          success: false,
+          message: "Patient already exists",
+        });
+      }
 
+      // 🔒 Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      const patient = await Patient.create({ name, email, password: hashedPassword, age, gender, isVerify: false });
-      const token = signToken(patient._id, 'patient');
+      // 🧍 Create patient in DB
+      const patient = await Patient.create({
+        name,
+        email,
+        password: hashedPassword,
+        age,
+        gender,
+        isVerify: false,
+      });
 
-      return res.created({ token, user: { id: patient._id, type: 'patient' } }, 'Patient registered successfully');
+      // 🎟️ Generate token
+      const token = signToken(patient._id, "patient");
+
+      // ✅ Send success response
+      return res.status(201).json({
+        success: true,
+        message: "Patient registered successfully",
+        token,
+        user: {
+          id: patient._id,
+          type: "patient",
+        },
+      });
     } catch (error) {
-      console.error('Patient Register Error:', error.message);
-      return res.serverError('Registration failed', { error: error.message });
+      console.error("Patient Register Error:", error.message);
+
+      // ❌ Send server error response
+      return res.status(500).json({
+        success: false,
+        message: "Registration failed",
+        error: error.message,
+      });
     }
   }
 );

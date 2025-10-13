@@ -8,7 +8,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      redirect('login/patient');
+      redirect('/login/patient');
     }
   }, [isAuthenticated]);
 
