@@ -31,12 +31,26 @@ const Authform = ({ type, userRole }: AuthformProps) => {
 
     try {
       if (type === 'signup') {
-        if (userRole === 'doctor') await registerDoctor(formData);
-        else await registerPatient(formData);
+        if (userRole === 'doctor') {
+          await registerDoctor({
+            name: formData.name,
+            email: formData.email,
+            password: formData.password,
+          });
+        } else {
+          await registerPatient({
+            name: formData.name,
+            email: formData.email,
+            password: formData.password,
+          });
+        }
         router.push(`/onboarding/${userRole}`);
       } else {
-        if (userRole === 'doctor') await loginDoctor(formData.email, formData.password);
-        else await loginPatient(formData.email, formData.password);
+        if (userRole === 'doctor'){
+          await loginDoctor(formData.email, formData.password);
+        } else {
+          await loginPatient(formData.email, formData.password);
+        }
 
         router.push(`/${userRole}/dashboard`);
       }
