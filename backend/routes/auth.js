@@ -15,26 +15,35 @@ const signToken = (id, type) =>
   jwt.sign({ id, type }, process.env.JWT_SECRET, { expiresIn: '2d' });
 
 // =======================================
-// DOCTOR REGISTER
+// ✅ DOCTOR REGISTER
 // =======================================
 router.post(
   '/doctor/register',
   [
     body('name').notEmpty().withMessage('Name is required'),
     body('email').isEmail().withMessage('Valid email is required'),
-    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+    body('password')
+      .isLength({ min: 6 })
+      .withMessage('Password must be at least 6 characters'),
   ],
   validate,
   async (req, res) => {
     try {
       const { name, email, password, specialization, healthcareCategory } = req.body;
 
-      if (await Doctor.findOne({ email })) {
-        return res.badRequest('Doctor already exists');
+      // Check if doctor exists
+      const existingDoctor = await Doctor.findOne({ email });
+      if (existingDoctor) {
+        return res.status(400).json({
+          success: false,
+          message: 'Doctor already exists',
+        });
       }
 
+      // Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
 
+      // Create doctor
       const doctor = await Doctor.create({
         name,
         email,
@@ -44,16 +53,33 @@ router.post(
         isVerify: false,
       });
 
+      // Generate JWT
       const token = signToken(doctor._id, 'doctor');
-      return res.created({ token, user: { id: doctor._id, type: 'doctor' } }, 'Doctor registered successfully');
+
+      // Success response
+      return res.status(201).json({
+        success: true,
+        message: 'Doctor registered successfully',
+        token,
+        user: {
+          id: doctor._id,
+          type: 'doctor',
+        },
+      });
     } catch (error) {
       console.error('Doctor Register Error:', error.message);
-      return res.serverError('Registration failed', { error: error.message });
+      return res.status(500).json({
+        success: false,
+        message: 'Registration failed',
+        error: error.message,
+      });
     }
   }
 );
 
-// DOCTOR LOGIN
+// =======================================
+// ✅ DOCTOR LOGIN
+// =======================================
 router.post(
   '/doctor/login',
   [
@@ -64,68 +90,124 @@ router.post(
   async (req, res) => {
     try {
       const { email, password } = req.body;
-      const doctor = await Doctor.findOne({ email });
-      if (!doctor) return res.badRequest('Invalid email or password');
 
-      if (!doctor.password) return res.badRequest('Login via Google');
+      const doctor = await Doctor.findOne({ email });
+      if (!doctor)
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid email or password',
+        });
+
+      if (!doctor.password)
+        return res.status(400).json({
+          success: false,
+          message: 'Login via Google',
+        });
 
       const isMatch = await bcrypt.compare(password, doctor.password);
-      if (!isMatch) return res.badRequest('Invalid email or password');
+      if (!isMatch)
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid email or password',
+        });
 
       const token = signToken(doctor._id, 'doctor');
-      return res.ok({ token, user: { id: doctor._id, type: 'doctor' } }, 'Doctor login successful');
+
+      return res.status(200).json({
+        success: true,
+        message: 'Doctor login successful',
+        token,
+        user: {
+          id: doctor._id,
+          type: 'doctor',
+        },
+      });
     } catch (error) {
       console.error('Doctor Login Error:', error.message);
-      return res.serverError('Login failed', { error: error.message });
+      return res.status(500).json({
+        success: false,
+        message: 'Login failed',
+        error: error.message,
+      });
     }
   }
 );
 
-// DOCTOR GOOGLE LOGIN/SIGNUP
+// =======================================
+// ✅ DOCTOR GOOGLE LOGIN/SIGNUP
+// =======================================
 router.post('/doctor/google', async (req, res) => {
   try {
     const { tokenId } = req.body;
-    const ticket = await client.verifyIdToken({ idToken: tokenId, audience: process.env.GOOGLE_CLIENT_ID });
+
+    const ticket = await client.verifyIdToken({
+      idToken: tokenId,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
     const { email, name } = ticket.getPayload();
 
     let doctor = await Doctor.findOne({ email });
-    if (!doctor) doctor = await Doctor.create({ name, email, registeredViaGoogle: true, isVerify: true });
-    else if (!doctor.registeredViaGoogle) { doctor.registeredViaGoogle = true; await doctor.save(); }
+    if (!doctor) {
+      doctor = await Doctor.create({
+        name,
+        email,
+        registeredViaGoogle: true,
+        isVerify: true,
+      });
+    } else if (!doctor.registeredViaGoogle) {
+      doctor.registeredViaGoogle = true;
+      await doctor.save();
+    }
 
     const token = signToken(doctor._id, 'doctor');
-    return res.ok({ token, user: { id: doctor._id, type: 'doctor' } }, 'Google login successful (doctor)');
+
+    return res.status(200).json({
+      success: true,
+      message: 'Google login successful (doctor)',
+      token,
+      user: {
+        id: doctor._id,
+        type: 'doctor',
+      },
+    });
   } catch (error) {
     console.error('Doctor Google Login Error:', error.message);
-    return res.serverError('Google login failed', { error: error.message });
+    return res.status(500).json({
+      success: false,
+      message: 'Google login failed',
+      error: error.message,
+    });
   }
 });
 
-// PATIENT REGISTER
+// =======================================
+// ✅ PATIENT REGISTER
+// =======================================
 router.post(
-  "/patient/register",
+  '/patient/register',
   [
-    body("name").notEmpty().withMessage("Name is required"),
-    body("email").isEmail().withMessage("Valid email is required"),
-    body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
+    body('name').notEmpty().withMessage('Name is required'),
+    body('email').isEmail().withMessage('Valid email is required'),
+    body('password')
+      .isLength({ min: 6 })
+      .withMessage('Password must be at least 6 characters'),
   ],
   validate,
   async (req, res) => {
     try {
       const { name, email, password, age, gender } = req.body;
 
-      // 🔍 Check if patient already exists
       const existingPatient = await Patient.findOne({ email });
       if (existingPatient) {
         return res.status(400).json({
           success: false,
-          message: "Patient already exists",
+          message: 'Patient already exists',
         });
       }
 
-      // 🔒 Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // 🧍 Create patient in DB
       const patient = await Patient.create({
         name,
         email,
@@ -135,33 +217,31 @@ router.post(
         isVerify: false,
       });
 
-      // 🎟️ Generate token
-      const token = signToken(patient._id, "patient");
+      const token = signToken(patient._id, 'patient');
 
-      // ✅ Send success response
       return res.status(201).json({
         success: true,
-        message: "Patient registered successfully",
+        message: 'Patient registered successfully',
         token,
         user: {
           id: patient._id,
-          type: "patient",
+          type: 'patient',
         },
       });
     } catch (error) {
-      console.error("Patient Register Error:", error.message);
-
-      // ❌ Send server error response
+      console.error('Patient Register Error:', error.message);
       return res.status(500).json({
         success: false,
-        message: "Registration failed",
+        message: 'Registration failed',
         error: error.message,
       });
     }
   }
 );
 
-// PATIENT LOGIN
+// =======================================
+// ✅ PATIENT LOGIN
+// =======================================
 router.post(
   '/patient/login',
   [
@@ -173,35 +253,85 @@ router.post(
     try {
       const { email, password } = req.body;
       const patient = await Patient.findOne({ email });
-      if (!patient) return res.badRequest('Invalid email or password');
+
+      if (!patient)
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid email or password',
+        });
 
       const isMatch = await bcrypt.compare(password, patient.password);
-      if (!isMatch) return res.badRequest('Invalid email or password');
+      if (!isMatch)
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid email or password',
+        });
 
       const token = signToken(patient._id, 'patient');
-      return res.ok({ token, user: { id: patient._id, type: 'patient' } }, 'Patient login successful');
+      console.log("Generated Token:", token);
+
+      return res.status(200).json({
+        success: true,
+        message: 'Patient login successful',
+        token,
+        user: {
+          id: patient._id,
+          type: 'patient',
+        },
+      });
     } catch (error) {
       console.error('Patient Login Error:', error.message);
-      return res.serverError('Login failed', { error: error.message });
+      return res.status(500).json({
+        success: false,
+        message: 'Login failed',
+        error: error.message,
+      });
     }
   }
 );
 
-// PATIENT GOOGLE LOGIN/SIGNUP
+// =======================================
+// ✅ PATIENT GOOGLE LOGIN/SIGNUP
+// =======================================
 router.post('/patient/google', async (req, res) => {
   try {
     const { tokenId } = req.body;
-    const ticket = await client.verifyIdToken({ idToken: tokenId, audience: process.env.GOOGLE_CLIENT_ID });
+
+    const ticket = await client.verifyIdToken({
+      idToken: tokenId,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
     const { email, name } = ticket.getPayload();
 
     let patient = await Patient.findOne({ email });
-    if (!patient) patient = await Patient.create({ name, email, password: '', isVerify: true });
+    if (!patient) {
+      patient = await Patient.create({
+        name,
+        email,
+        password: '',
+        isVerify: true,
+      });
+    }
 
     const token = signToken(patient._id, 'patient');
-    return res.ok({ token, user: { id: patient._id, type: 'patient' } }, 'Google login successful (patient)');
+
+    return res.status(200).json({
+      success: true,
+      message: 'Google login successful (patient)',
+      token,
+      user: {
+        id: patient._id,
+        type: 'patient',
+      },
+    });
   } catch (error) {
     console.error('Patient Google Login Error:', error.message);
-    return res.serverError('Google login failed', { error: error.message });
+    return res.status(500).json({
+      success: false,
+      message: 'Google login failed',
+      error: error.message,
+    });
   }
 });
 
