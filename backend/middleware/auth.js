@@ -2,51 +2,33 @@ const jwt = require('jsonwebtoken');
 const Doctor = require('../models/Doctor');
 const Patient = require('../models/Patient');
 
+
 module.exports = {
-  // ✅ Middleware to verify JWT and fetch user
-  authenticate: async (req, res, next) => {
-    try {
-      const header = req.headers.authorization;
+    authenticate: async (req,res,next) => {
+        try {
+            const header = req.headers.authorization;
+            const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+            if(!token ) return res.unauthorized('Missing token');
 
-      // Check header presence
-      if (!header || !header.startsWith('Bearer ')) {
-        return res.status(401).json({ success: false, message: 'Token missing' });
-      }
+            const decode = jwt.verify(token, process.env.JWT_SECRET);
+            req.auth = decode;
 
-      // Extract token
-      const token = header.split(' ')[1];
+            if(decode.type === 'doctor') {
+                req.user = await Doctor.findById(decode.id);
+            }else if(decode.type === 'patient'){
+                req.user = await Patient.findById(decode.id);
+            }
 
-      // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.auth = decoded;
-
-      // Fetch user based on role type
-      let user;
-      if (decoded.type === 'doctor') {
-        user = await Doctor.findById(decoded.id);
-      } else if (decoded.type === 'patient') {
-        user = await Patient.findById(decoded.id);
-      }
-
-      // If user not found
-      if (!user) {
-        return res.status(401).json({ success: false, message: 'Invalid user' });
-      }
-
-      // Attach user
-      req.user = user;
-      next();
-    } catch (error) {
-      console.error('Auth error:', error.message);
-      return res.status(401).json({ success: false, message: 'Invalid or expired token' });
+            if(!req.user) return res.unauthorized("Invalid user");
+            next();
+        } catch (error) {
+             return res.unauthorized("Invalid or expired token");
+        }
+    },
+    requireRole : role => (req,res,next) => {
+        if(!req.auth || req.auth.type !== role) {
+            return res.forbidden("Insufficient role permissions");
+        }
+        next();
     }
-  },
-
-  // ✅ Middleware to restrict route based on role
-  requireRole: (role) => (req, res, next) => {
-    if (!req.auth || req.auth.type !== role) {
-      return res.status(403).json({ success: false, message: 'Insufficient role permissions' });
-    }
-    next();
-  },
-};
+}

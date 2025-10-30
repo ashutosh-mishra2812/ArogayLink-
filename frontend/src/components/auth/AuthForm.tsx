@@ -16,18 +16,20 @@ interface AuthformProps {
   userRole: 'patient' | 'doctor';
 }
 
-const Authform = ({ type, userRole }: AuthformProps) => {
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+const AuthForm = ({ type, userRole }: AuthformProps) => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
 
-  const { registerPatient, registerDoctor, loginPatient, loginDoctor, loading, error } =
+  const { registerPatient, registerDoctor, loginPatient, loginDoctor, loading, error, } =
     useAuthStore();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (type === 'signup' && !agreeTerms) return;
+    if (type === 'signup' && !agreeToTerms) return;
 
     try {
       if (type === 'signup') {
@@ -59,10 +61,14 @@ const Authform = ({ type, userRole }: AuthformProps) => {
     }
   };
 
-  const handleGoogleAuth = () => {
-    const base = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-    window.location.href = `${base}/api/auth/google?type=${userRole}`;
-  };
+const handleGoogleAuth = () => {
+  if (!BASE_URL) {
+    console.error("BASE_URL not set — check .env.local");
+    return;
+  }
+  window.location.href = `${BASE_URL}/auth/google?type=${userRole}`;
+};
+
 
   const isSignup = type === 'signup';
   const title = isSignup ? 'Create a secure account' : 'Welcome Back';
@@ -165,8 +171,8 @@ const Authform = ({ type, userRole }: AuthformProps) => {
               <div className="flex items-start gap-5 bg-gradient-to-r from-gray-50 via-gray-50 to-blue-50 p-3 rounded-xl border-1 border-gray-600 ">
                   <Checkbox
                     id="terms"
-                    checked={agreeTerms}
-                onCheckedChange={(checked) => setAgreeTerms(checked as boolean)}
+                    checked={agreeToTerms}
+                onCheckedChange={(checked) => setAgreeToTerms(checked as boolean)}
                  className="mt-0.5 border-2 border-blue-300"
                     />
                 <label htmlFor="terms" className="text-sm text-gray-700 leading-relaxed cursor-pointer">
@@ -185,7 +191,7 @@ const Authform = ({ type, userRole }: AuthformProps) => {
             <Button
               type='submit'
               className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 focus:ring-2 focus:ring-purple-300 font-medium rounded-xl text-sm  transition-all duration-300 transform hover:scale-105"
-                disabled={loading || (isSignup && !agreeTerms)}
+                disabled={loading || (isSignup && !agreeToTerms)}
             >
               {loading ?(
                 <span className="flex items-center justify-center gap-2">
@@ -261,4 +267,4 @@ const Authform = ({ type, userRole }: AuthformProps) => {
   )
 }
 
-export default Authform
+export default AuthForm

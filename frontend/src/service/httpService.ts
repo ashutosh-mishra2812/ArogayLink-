@@ -81,7 +81,7 @@ class HttpService {
       return data as ApiResponse<T>;
     } catch (error: any) {
       console.error(
-        `Api Error [${method || 'UNKNOWN'} ${endPoint || 'UNKNOWN'}]:`,
+        `Api Error [${method} ${endPoint}]:`,
         error?.message || JSON.stringify(error)
       );
       throw error;

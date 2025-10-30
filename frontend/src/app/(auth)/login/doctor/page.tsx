@@ -7,5 +7,5 @@ export const metadata = {
 };
 
 export default function DoctorLoginPage() {
-  return <AuthForm type="login" userRole="doctor" />;
+  return <AuthForm type="login" userRole='doctor' />;
 }

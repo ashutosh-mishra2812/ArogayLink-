@@ -24,6 +24,10 @@
     "moment-timezone": "^0.6.0",
     "mongoose": "^8.18.2",
     "morgan": "^1.10.1",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-jwt": "^4.0.1",
+    "passport-local": "^1.0.0"
   }
 }
