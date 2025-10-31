@@ -17,8 +17,8 @@ module.exports = (req, res, next) => {
   res.notFound = (message = "Not Found") =>
     res.status(404).json({ success: false, message });
 
-  res.serverError = (message = "Internal Server Error", errors = []) =>
-    res.status(500).json({ success: false, message, errors });
+  res.serverError = (message = "Internal Server Error", data = {}) =>
+    res.status(500).json({ success: false, message, data });
 
   next();
 };

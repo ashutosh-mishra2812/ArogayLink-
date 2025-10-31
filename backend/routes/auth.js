@@ -101,52 +101,33 @@ router.post('/doctor/register',
 
 
 
- //Google Outh Start form here
+
+// Step 1: Start Google Auth
+router.get('/google', (req, res, next) => {
+  const userType = req.query.type || 'patient';
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    state: userType,
+    prompt: 'select_account',
+  })(req, res, next);
+});
 
 
- router.get('/google', (req,res,next) => {
-    const userType = req.query.type || 'patient';
+// Step 2: Callback URL
+router.get(
+  '/google/callback',
+  passport.authenticate('google', { session: false, failureRedirect: '/api/auth/failure' }),
+  (req, res) => {
+    const { user, type } = req.user;
+    const token = signToken(user._id, type);
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const redirectUrl = `${frontendUrl}/auth/success?token=${token}&type=${type}`;
+    res.redirect(redirectUrl);
+  }
+);
+// Step 3: Failure route
+router.get('/failure', (req, res) => {
+  res.status(400).json({ message: 'Google Authentication Failed' });
+});
 
-    passport.authenticate('google', {
-        scope:['profile', 'email'],
-        state:userType,
-        prompt:'select_account'
-    })(req,res,next)
- })
-
-
-
- router.get('/google/callback', 
-    passport.authenticate('google', {
-        session:false,
-        failureRedirect: "/auth/failure"
-    }),
-
-    async(req,res) => {
-        try {
-             const {user,type} = req.user;
-             const token = signToken(user._id,type);
-
-
-             //Redirect to frontend with token
-             const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-             const redirectUrl = `${frontendUrl}/auth/success?token=${token}&type=${type}&user=${encodeURIComponent(JSON.stringify({
-                id: user._id,
-                name: user.name,
-                email:user.email,
-                profileImage: user.profileImage,
-             }))}`;
-
-             res.redirect(redirectUrl)
-        } catch (error) {
-        res.redirect(`${process.env.FRONTEND_URL}/auth/error?message=${encodeURIComponent(e.message)}`)
-        }
-    }
- )
-
-
- //Auth failure
- router.get('/failure', (req,res) => res.badRequest('Google authentication Failed'))
-
-
- module.exports = router;
+module.exports = router;

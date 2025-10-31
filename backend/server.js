@@ -4,8 +4,11 @@ const { connectDB } = require('./db/db');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const passport = require('passport');
 const response = require('./middleware/response');
 const moment = require('moment-timezone');
+const path = require ('path')
 
 const app = express();
 
@@ -35,9 +38,16 @@ app.use(cors({
 }));
 
 // Custom response helpers: res.ok, res.created, etc.
+app.use(cookieParser());
+app.use(passport.initialize());
 app.use(response);
 
+// Load passport strategy
+// require('./passport');
+
+
 // Routes
+// app.use('/api/auth', require('./routes/googleAuth'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/doctor', require('./routes/doctor'));
 app.use('/api/patient', require('./routes/patient'));

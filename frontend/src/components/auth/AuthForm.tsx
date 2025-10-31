@@ -62,10 +62,6 @@ const AuthForm = ({ type, userRole }: AuthformProps) => {
   };
 
 const handleGoogleAuth = () => {
-  if (!BASE_URL) {
-    console.error("BASE_URL not set — check .env.local");
-    return;
-  }
   window.location.href = `${BASE_URL}/auth/google?type=${userRole}`;
 };
 
