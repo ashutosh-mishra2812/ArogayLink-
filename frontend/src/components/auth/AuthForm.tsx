@@ -1,4 +1,3 @@
-// frontend/src/components/auth/AuthForm.tsx
 'use client';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
