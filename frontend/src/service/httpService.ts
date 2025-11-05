@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-// ✅ Default backend URL
+//Default backend URL
 const BASE_URL =
   (process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '') || 'http://localhost:5000/api').trim();
 
@@ -36,7 +36,7 @@ class HttpService {
     options?: RequestOptions
   ): Promise<ApiResponse<T>> {
     try {
-      // ✅ Ensure single-slash endpoint
+      // Ensure single-slash endpoint
       const cleanEndpoint = endPoint.startsWith('/') ? endPoint : `/${endPoint}`;
       const url = `${BASE_URL}${cleanEndpoint}`;
 
@@ -65,7 +65,7 @@ class HttpService {
           throw new Error(`Invalid JSON response from server: ${text}`);
         }
       } else if (text) {
-        // ❌ Non-JSON (HTML or text) response
+        // Non-JSON (HTML or text) response
         throw new Error(
           `Non-JSON response from ${url} (check backend route!):\n${text.substring(0, 300)}...`
         );
